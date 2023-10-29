@@ -23,6 +23,10 @@ class DewarpingCalibrationCorrected:
     @staticmethod
     def bernstein(N, k, u):
         return comb(N, k) * (1 - u) ** (N - k) * u ** k
+    
+    @staticmethod
+    def denormalize(data, q_min, q_max):
+        return data * (q_max - q_min) + q_min
 
 # degree: The degree of the Bernstein polynomial.
 # u: A NumPy array containing input values for the polynomial.
@@ -50,6 +54,7 @@ class DewarpingCalibrationCorrected:
         F = self.construct_f_matrix(normalized_data)
 
         self.coefficients = np.linalg.lstsq(F, ground_truth, rcond=None)[0]
+        #print(len(self.coefficients))
 
 # data: A NumPy array containing the data to be corrected.
 # q_min: A NumPy array representing the minimum values used for scaling.
@@ -63,7 +68,23 @@ class DewarpingCalibrationCorrected:
         F = self.construct_f_matrix(normalized_data)
 
         corrected_data = F @ self.coefficients
+        # print("corrected", corrected_data)
+        # print("q_min", self.q_min)
+        # print("q_max", self.q_max)
+        corrected_data = DewarpingCalibrationCorrected.denormalize(corrected_data, self.q_min, self.q_max)
+        # print("denormalize", corrected_data)
         return corrected_data
+
+if __name__ == "__main__":
+    distorted_data = np.random.rand(10000, 3) * 10
+    ground_truth_data = distorted_data + np.random.randn(10000, 3) * 0.1
+    calibrator_corrected = DewarpingCalibrationCorrected()
+    sample_data = np.array([[5, 5, 5],[1,1,1]])
+    calibrator_corrected.fit(distorted_data, ground_truth_data)
+
+    corrected_sample = calibrator_corrected.correction(sample_data)
+
+    print(corrected_sample)
 
 
 

@@ -2,6 +2,7 @@ import numpy as np
 from calibration_library import *
 from dataParsing_library import *
 from validation_test import *
+from distortion_library import *
 import copy
 import os
 import re
@@ -39,39 +40,58 @@ def main():
     registration = setRegistration()
     np.set_printoptions(formatter={'float': '{:.2f}'.format})
 
-    # Q4
-    # Part A 
+    # Step 1
+    # Use transformed Ci expected from ci, compared against real Ci
+    # in calreading to calculate degree of distortion
+
     source_points_d = d0
     trans_matrix_d = []
     target_points = []
 
-    for i in range(8):
+    for i in range(125):
         target_points = calreading_frames[i][:8]
         transformation_matrix = registration.calculate_3d_transformation(source_points_d, target_points)
         trans_matrix_d.append(transformation_matrix)
 
-    # Part B
     source_points_a = a0
     trans_matrix_a = []
     target_points = []
 
-    for i in range(8):
+    for i in range(125):
         target_points = calreading_frames[i][8:16]
         transformation_matrix = registration.calculate_3d_transformation(source_points_a, target_points)
         trans_matrix_a.append(transformation_matrix)
     
-    # Part C
     source_points_c = c0
     transformation_matrix = []
     transformed_point = []
-    for i in range(8):
+    distorted_data = []
+
+    for i in range(125):
+        distorted_data.append(calreading_frames[i][16:43])
         transformation_matrix = np.dot(np.linalg.inv(trans_matrix_d[i]), trans_matrix_a[i])
         transformed_point.append(registration.apply_transformation(source_points_c, transformation_matrix))
     
-    # Part D
-    # print(transformed_point)
+    # 27 * 125 frames Ci expected 
+    print(transformed_point[1])
 
-    # Q5
+    # Step 2
+    # undistort empivot_frames
+    # distorted_data
+    ground_truth_data = transformed_point
+    # print(len(distorted_data), len(ground_truth_data))
+    # print(len(distorted_data[0]), len(ground_truth_data[0]))
+    calibrator_corrected = DewarpingCalibrationCorrected()
+    sample_data = empivot_frames
+    print(len(empivot_frames))
+
+    # 125 frames, each of which has 27 points 
+    calibrator_corrected.fit(distorted_data[0], ground_truth_data[0])
+
+    # 12 frames, each of which has 12 points
+    #corrected_sample = calibrator_corrected.correction(sample_data)
+'''
+    # Step 3
     # Initalize the set for gj = Gj - G0
     translated_points_Gj = copy.deepcopy(empivot_frames)
     # Find centroid of Gj (the original position of 6 EM markers on the probe)
@@ -132,19 +152,7 @@ def main():
         trans_matrix_f.append(transformation_matrix)
     p_tip_H, p_pivot_H = registration.pivot_calibration(trans_matrix_f)
 
-    # format output
-    # Output 1
-    output_name_cal = 'pa2-unknown-' + choose_set + '-output1.txt'
-    input = str(p_pivot_G) + str(p_pivot_H) + str(transformed_point)
-    lines = input.strip().split("\n")
-    converted_lines = []
-
-    for line in lines:
-        numbers = re.findall(r"[-+]?\d*\.\d+|\d+", line)
-        groups_of_three = [numbers[i:i + 3] for i in range(0, len(numbers), 3)]
-        formatted_groups = [", ".join([f"{float(num):7.2f}" for num in group]) for group in groups_of_three]
-        converted_lines.extend(formatted_groups)
-    output_string = "\n".join(converted_lines)
+    
 
 
     # Output 2
@@ -154,14 +162,16 @@ def main():
     with open(output_name_cal, "w") as file:
         file.write('27, 8, ' + output_name_cal + '\n')
         file.write(output_string)
-
+'''
+    
 if __name__ == "__main__":
     main()
-    '''
-    v = validate()
-    file1 = 'pa1_student_data\PA1 Student Data\pa1-debug-g-output1.txt'
-    file2 = 'OUTPUT\pa1-unknown-g-output.txt'
     
-    percentage_differences = v.calculate_error_from_sample(file1, file2, use_reference=0)
-    print(np.mean(percentage_differences))
-    '''
+    # v = validate()
+    # file1 = 'pa1_student_data\PA1 Student Data\pa1-debug-g-output1.txt'
+    # file2 = 'OUTPUT\pa1-unknown-g-output.txt'
+    
+    # percentage_differences = v.calculate_error_from_sample(file1, file2, use_reference=0)
+    # print(np.mean(percentage_differences))
+    
+    
