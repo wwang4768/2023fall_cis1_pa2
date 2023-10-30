@@ -81,7 +81,7 @@ def main():
         transformed_point.append(registration.apply_transformation(source_points_c, transformation_matrix))
     
     # 27 * 125 frames Ci expected 
-    print(transformed_point[0])
+    # print(transformed_point)
 
     # Step 2
     # undistort empivot_frames
@@ -91,15 +91,32 @@ def main():
     # print(len(distorted_data[0]), len(ground_truth_data[0]))
     calibrator_corrected = DewarpingCalibrationCorrected()
     sample_data = empivot_frames
-    print(len(empivot_frames))
+
+    distorted_data_comb = []
+    ground_truth_data_comb = []
+
+    for i in range(125):
+        for j in range(27):
+            distorted_data_comb.append(distorted_data[i][j])
+            ground_truth_data_comb.append(ground_truth_data[i][j])
+    
+    print(len(distorted_data_comb))
 
     # 125 frames, each of which has 27 points 
-    calibrator_corrected.fit(distorted_data[0], ground_truth_data[0])
+    calibrator_corrected.fit(distorted_data_comb, ground_truth_data_comb)
 
     # 12 frames, each of which has 6 points
-    #corrected_sample = calibrator_corrected.correction(sample_data)
+    # Everything related G has to be corrected to dewarp the distortion
+    # corrected_sample = calibrator_corrected.correction(sample_data)
+
+    corrected_sample = []
+    for i in range(12):
+        corrected_sample.append(calibrator_corrected.correction(sample_data[i]))
+    #print(sample_data[0])
+    #print(corrected_sample[0])
 
     # Step 3
+    empivot_frames = corrected_sample
     # Initalize the set for gj = Gj - G0
     translated_points_Gj = copy.deepcopy(empivot_frames)
     # Find centroid of Gj (the original position of 6 EM markers on the probe)
@@ -118,6 +135,7 @@ def main():
         transformation_matrix = registration.calculate_3d_transformation(source_points, target_points)
         trans_matrix_FG.append(transformation_matrix)
     p_tip_G, p_pivot_bj = registration.pivot_calibration(trans_matrix_FG)
+    print(p_pivot_bj)
 
     # Step 4
     # Initalize the set for gj = Gj - G0
@@ -137,18 +155,44 @@ def main():
         target_points_fid = em_fid_frames[i]
         transformation_matrix_fid = registration.calculate_3d_transformation(source_points_fid, target_points_fid)
         trans_matrix_FG_fid.append(transformation_matrix_fid)
+    #print(len(trans_matrix_FG_fid))
+    #print(trans_matrix_FG_fid[0])
 
+    pivot_Bj = []
     # may have to loop through - apply transformation matrices to p_pivot_G
-    pivot_Bj = registration.apply_transformation(p_pivot_bj, trans_matrix_FG_fid)
+    for i in range(6):
+        pivot_Bj.append(registration.apply_transformation_single_pt(p_pivot_bj, trans_matrix_FG_fid[i]))
+    print(pivot_Bj)
+    
 
     # Step 5
     source_points_bj = ct_fid_point_cloud #bj 
     target_points_bj = pivot_Bj
     transformation_matrix_Bj = registration.calculate_3d_transformation(source_points_bj, target_points_bj)
+    print(transformation_matrix_Bj)
 
     # Step 6
+    # Initalize the set for gj = Gj - G0
+    translated_points_Gj_nav = copy.deepcopy(em_nav_frames)
+    # Find centroid of Gj (the original position of 6 EM markers on the probe)
+    midpoint_nav = np.mean(em_nav_frames, axis=1)
+    trans_matrix_FG_nav = []
 
-
+    for i in range(4):
+        for j in range(6):
+            p = em_nav_frames[i][j] - midpoint_nav[i]
+            translated_points_Gj_nav[i][j] = p
+    
+    # fix gj as the original starting positions
+    source_points_nav = translated_points_Gj_nav[0]
+    for i in range(4):
+        target_points_nav = em_nav_frames[i]
+        transformation_matrix_nav = registration.calculate_3d_transformation(source_points_nav, target_points_nav)
+        trans_matrix_FG_nav.append(transformation_matrix_nav)
+    # p_dimple * FGi * Freg 
+    output = registration.apply_transformation(p_pivot_bj, trans_matrix_FG_nav) # need to loop
+    output = registration.apply_transformation(output, transformation_matrix_Bj)
+    print(output)
 '''
     # Q6
     # Initalize the set for hj = Hj - H0

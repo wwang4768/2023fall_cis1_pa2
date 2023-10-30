@@ -23,10 +23,6 @@ class DewarpingCalibrationCorrected:
     @staticmethod
     def bernstein(N, k, u):
         return comb(N, k) * (1 - u) ** (N - k) * u ** k
-    
-    @staticmethod
-    def denormalize(data, q_min, q_max):
-        return data * (q_max - q_min) + q_min
 
 # degree: The degree of the Bernstein polynomial.
 # u: A NumPy array containing input values for the polynomial.
@@ -62,7 +58,7 @@ class DewarpingCalibrationCorrected:
 # coefficients: A NumPy array of coefficients obtained from calibration.
     def correction(self, data):
         if self.coefficients is None:
-            raise ValueError("Model has not been fitted yet.")
+            raise ValueError("Model has not been fitted yet - invalid coefficients")
 
         normalized_data = DewarpingCalibrationCorrected.scale_to_box(data, self.q_min, self.q_max)
         F = self.construct_f_matrix(normalized_data)
@@ -71,15 +67,14 @@ class DewarpingCalibrationCorrected:
         # print("corrected", corrected_data)
         # print("q_min", self.q_min)
         # print("q_max", self.q_max)
-        corrected_data = DewarpingCalibrationCorrected.denormalize(corrected_data, self.q_min, self.q_max)
-        # print("denormalize", corrected_data)
+ 
         return corrected_data
 
 if __name__ == "__main__":
     distorted_data = np.random.rand(10000, 3) * 10
     ground_truth_data = distorted_data + np.random.randn(10000, 3) * 0.1
     calibrator_corrected = DewarpingCalibrationCorrected()
-    sample_data = np.array([[5, 5, 5],[1,1,1]])
+    sample_data = np.array([[6, 6, 6], [1,1,1], [3,3,3]])
     calibrator_corrected.fit(distorted_data, ground_truth_data)
 
     corrected_sample = calibrator_corrected.correction(sample_data)

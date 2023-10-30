@@ -45,6 +45,16 @@ class setRegistration:
         normalized_points = transformed_points[:, :3] / transformed_points[:, 3, np.newaxis]
 
         return normalized_points
+    
+    def apply_transformation_single_pt(self, point, transformation_matrix):
+        # To facilitate computation
+        point = np.append(point, 1.0)
+        
+        transformed_point = np.dot(transformation_matrix, point)
+        
+        # Extract the transformed 3D coordinates
+        transformed_coordinates = transformed_point[:3]
+        return transformed_coordinates
 
     def optimization_heuristics(self, parameters, transformation_matrices):
         p_tip = parameters[:3].reshape(3, 1)
