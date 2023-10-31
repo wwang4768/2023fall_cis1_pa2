@@ -11,7 +11,7 @@ def main():
     # Read in input dataset
     script_directory = os.path.dirname(__file__)
     dirname = os.path.dirname(script_directory)
-    choose_set = 'f'
+    choose_set = 'a'
     #base_path = os.path.join(dirname, 'pa2_student_data\\PA2 Student Data\\pa2-unknown-')
     base_path = os.path.join(dirname, 'pa2_student_data\\PA2 Student Data\\pa2-debug-')
 
@@ -81,7 +81,7 @@ def main():
         transformed_point.append(registration.apply_transformation(source_points_c, transformation_matrix))
     
     # 27 * 125 frames Ci expected 
-    # print(transformed_point)
+    # print(transformed_point[0])
 
     # Step 2
     # undistort empivot_frames

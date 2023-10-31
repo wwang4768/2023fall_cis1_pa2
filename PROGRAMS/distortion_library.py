@@ -46,6 +46,9 @@ class DewarpingCalibrationCorrected:
         self.q_min = np.min(distorted_data, axis=0)
         self.q_max = np.max(distorted_data, axis=0)
 
+        # print("q_min", self.q_min)
+        # print("q_max", self.q_max)
+
         normalized_data = DewarpingCalibrationCorrected.scale_to_box(distorted_data, self.q_min, self.q_max)
         F = self.construct_f_matrix(normalized_data)
 
@@ -65,8 +68,8 @@ class DewarpingCalibrationCorrected:
 
         corrected_data = F @ self.coefficients
         # print("corrected", corrected_data)
-        # print("q_min", self.q_min)
-        # print("q_max", self.q_max)
+        #print("q_min", self.q_min)
+        #print("q_max", self.q_max)
  
         return corrected_data
 
