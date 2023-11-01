@@ -11,7 +11,7 @@ def main():
     # Read in input dataset
     script_directory = os.path.dirname(__file__)
     dirname = os.path.dirname(script_directory)
-    choose_set = 'c'
+    choose_set = 'f'
     #base_path = os.path.join(dirname, 'pa2_student_data\\PA2 Student Data\\pa2-unknown-')
     base_path = os.path.join(dirname, 'pa2_student_data\\PA2 Student Data\\pa2-debug-')
 
@@ -134,10 +134,8 @@ def main():
         target_points = empivot_frames[i]
         transformation_matrix = registration.calculate_3d_transformation(source_points, target_points)
         trans_matrix_FG.append(transformation_matrix)
-    #p_tip_G, p_dimple = registration.pivot_calibration(trans_matrix_FG)
-    #print(p_dimple)
     p_tip_G, _ = registration.pivot_calibration(trans_matrix_FG)
-    #print(p_tip_G)
+    print(p_tip_G)
 
     # Step 4
     # Initalize the set for gj = Gj - G0
@@ -145,34 +143,30 @@ def main():
     corrected_em_fid_sample = []
     for i in range(6):
         corrected_em_fid_sample.append(calibrator_corrected.correction(em_fid_frames[i]))
-
     translated_points_Gj_fid = copy.deepcopy(corrected_em_fid_sample)
     # Find centroid of Gj (the original position of 6 EM markers on the probe)
-    #midpoint_fid = np.mean(corrected_em_fid_sample, axis=1)
+
     trans_matrix_FG_fid = []
-    
-    # fix gj as the original starting positions
-    #source_points_fid = translated_points_Gj_fid[0]
+
     source_points_fid = translated_points_Gj[0]
     for i in range(6):
         target_points_fid = corrected_em_fid_sample[i]
         transformation_matrix_fid = registration.calculate_3d_transformation(source_points_fid, target_points_fid)
         trans_matrix_FG_fid.append(transformation_matrix_fid)
-    #print(len(trans_matrix_FG_fid))
-    #print(trans_matrix_FG_fid[0])
-
+    
+    
     pivot_Bj = []
     # may have to loop through - apply transformation matrices to p_pivot_G
     for i in range(6):
         pivot_Bj.append(registration.apply_transformation_single_pt(p_tip_G, trans_matrix_FG_fid[i]))
-    #print(pivot_Bj)
-    
+    # print(pivot_Bj)
+
 
     # Step 5
     source_points_bj = ct_fid_point_cloud #bj 
     target_points_bj = pivot_Bj
     transformation_matrix_Bj = registration.calculate_3d_transformation(source_points_bj, target_points_bj)
-    #print(transformation_matrix_Bj)
+    print(transformation_matrix_Bj)
 
     # Step 6
     # Initalize the set for gj = Gj - G0
@@ -185,7 +179,7 @@ def main():
     #print(len(translated_points_Gj_nav))
     #print(translated_points_Gj_nav[0])
     # Find centroid of Gj (the original position of 6 EM markers on the probe)
-    #midpoint_nav = np.mean(corrected_em_nav_sample, axis=1)
+
     trans_matrix_FG_nav = []
 
     # fix gj as the original starting positions
