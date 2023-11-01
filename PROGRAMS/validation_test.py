@@ -11,7 +11,7 @@ class TestDistortionCorrection(unittest.TestCase):
         np.random.seed(0) 
         self.distorted_data = np.random.rand(10000, 3) * 10
         self.ground_truth_data = self.distorted_data + np.random.randn(10000, 3) * 0.1
-        self.sample_data = np.array([[5, 5, 5],[1,1,1]])
+        self.sample_data = np.array([[6, 6, 6], [1,1,1], [3,3,3]])
 
     def test_calibration_and_correction(self):
         calibrator_corrected = DewarpingCalibrationCorrected()
