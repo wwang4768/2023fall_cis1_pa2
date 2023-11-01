@@ -1,46 +1,47 @@
-import numpy as np
+import numpy as np, copy, os, re, argparse
 from calibration_library import *
 from dataParsing_library import *
 from validation_test import *
-from distortion_library import *
-import copy
-import os
-import re
+from distortion_library import * 
 
 def main(): 
+    # User interface prompt that takes input from user
+    parser = argparse.ArgumentParser(description='Description of your script')
+    parser.add_argument('input_type', help='The debug or unknown input data to process')
+    parser.add_argument('choose_set', help='The alphabetical index of the data set')
+    args = parser.parse_args()
+
     # Read in input dataset
     script_directory = os.path.dirname(__file__)
     dirname = os.path.dirname(script_directory)
-    choose_set = 'c'
-    #base_path = os.path.join(dirname, 'pa2_student_data\\PA2 Student Data\\pa2-unknown-')
-    base_path = os.path.join(dirname, 'pa2_student_data\\PA2 Student Data\\pa2-debug-')
+    base_path = os.path.join(dirname, f'PROGRAMS\\pa2_student_data\\pa2-{args.input_type}-{args.choose_set}')
 
-    calbody = base_path + choose_set + '-calbody.txt'
+    calbody = base_path + '-calbody.txt'
     calbody_point_cloud = parseData(calbody)
     d0, a0, c0 = parseCalbody(calbody_point_cloud)
 
-    calreading = base_path + choose_set + '-calreadings.txt'
+    calreading = base_path + '-calreadings.txt'
     calreading_point_cloud = parseData(calreading)
     calreading_frames = parseFrame(calreading_point_cloud, 8+8+27) # 8 optical markers on calibration object and 27 EM markers on calibration object
     
-    # new inputs to be incorporated 
-    ct_fid = base_path + choose_set + '-ct-fiducials.txt'
+    # new inputs specific to PA2 to be incorporated 
+    ct_fid = base_path + '-ct-fiducials.txt'
     ct_fid_point_cloud = parseData(ct_fid)
 
-    em_fid = base_path + choose_set + '-em-fiducialss.txt'
+    em_fid = base_path + '-em-fiducialss.txt'
     em_fid_point_cloud = parseData(em_fid)
     em_fid_frames = parseFrame(em_fid_point_cloud, 6) # stores the list of 6 frames, each of which contains data of 6 EM markers on probe 
 
 
-    em_nav = base_path + choose_set + '-EM-nav.txt'
+    em_nav = base_path + '-EM-nav.txt'
     em_nav_point_cloud = parseData(em_nav)
     em_nav_frames = parseFrame(em_nav_point_cloud, 6) # stores the list of 4 frames, each of which contains data of 6 EM markers on probe 
 
-    empivot = base_path + choose_set + '-empivot.txt'
+    empivot = base_path + '-empivot.txt'
     empivot_point_cloud = parseData(empivot)
     empivot_frames = parseFrame(empivot_point_cloud, 6) # stores the list of 12 frames, each of which contains data of 6 EM markers on probe 
     
-    optpivot = base_path + choose_set + '-optpivot.txt'
+    optpivot = base_path + '-optpivot.txt'
     optpivot_point_cloud = parseData(optpivot) # stores the list of 12 frames, each of which contains data of 8 optical markers on EM base & 6 EM markers on probe
     optpivot_em_frames, optpivot_opt_frames = parseOptpivot(optpivot_point_cloud, 8, 6) 
     
@@ -205,61 +206,19 @@ def main():
     
     for i in range(4):
         output[i] = registration.apply_transformation_single_pt(output[i], np.linalg.inv(transformation_matrix_Bj))
-    print(output)
-'''
-    # Q6ac
-    # Initalize the set for hj = Hj - H0
-    translated_points = copy.deepcopy(optpivot_opt_frames)
-    H_prime = []
-    # Find centroid of Hj (the original position of 6 EM markers on the probe)
-    midpoint = np.mean(optpivot_opt_frames, axis=1)
-    # Find transformation matrix for 12 frames
-    trans_matrix_f = []
 
-    # Calculate Fd
-    source_points_d = d0 #optpivot_em_frames[0]
-    transformation_matrix_Fd = []
-    target_points = []
+    # format output
+    output_name = f'pa2-{args.input_type}-{args.choose_set}-output2.txt'
 
-    for i in range(12):
-        target_points = optpivot_em_frames[i]
-        transformation_matrix = registration.calculate_3d_transformation(source_points_d, target_points)
-        transformation_matrix = np.linalg.inv(transformation_matrix)
-        transformation_matrix_Fd.append(transformation_matrix)
+    max_length = max(max(len(f"{point[0]:.2f}"), len(f"{point[1]:.2f}"), len(f"{point[2]:.2f}")) for point in output)
 
-    for i in range(12):
-        for j in range(6):
-        # fill out hj 
-            p = optpivot_opt_frames[i][j] - midpoint[i]
-            translated_points[i][j] = p
-    
-    #apply Fd to H
-    for i in range(12):
-        chunk_array = np.vstack(optpivot_opt_frames[i])
-        transformed_chunk = registration.apply_transformation(chunk_array, transformation_matrix_Fd[i])
-        H_prime.append(transformed_chunk)
+    with open(output_name, "w") as file:
+        file.write('4, ' + output_name + '\n')
 
-    # fix Hj as the original starting positions
-    source_points = translated_points[0]
-
-    for i in range(12):
-        target_points = H_prime[i]
-        transformation_matrix = registration.calculate_3d_transformation(source_points, target_points)
-        trans_matrix_f.append(transformation_matrix)
-    p_tip_H, p_pivot_H = registration.pivot_calibration(trans_matrix_f)
-
-    
-
-
-    # Output 2
-    output_name_ct = 'pa2-unknown-' + choose_set + '-output2.txt'
-
-    # write to output
-    with open(output_name_cal, "w") as file:
-        file.write('27, 8, ' + output_name_cal + '\n')
-        file.write(output_string)
-'''
-    
+        for point in output:
+            formatted_point = '  ' + f"{ point[0]:>{max_length}.2f}, {point[1]:>{max_length}.2f}, {point[2]:>{max_length}.2f}\n"
+            file.write(formatted_point)     
+ 
 if __name__ == "__main__":
     main()
     
