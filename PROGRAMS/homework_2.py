@@ -202,7 +202,7 @@ def main():
         transformation_matrix_nav = registration.calculate_3d_transformation(source_points_nav, target_points_nav)
         trans_matrix_FG_nav.append(transformation_matrix_nav)
     # p_dimple * FGi * Freg 
-    print(trans_matrix_FG_nav[0])
+    #print(trans_matrix_FG_nav[0])
     #print(len(transformation_matrix_Bj))
 
     output = []
