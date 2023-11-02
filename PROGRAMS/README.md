@@ -13,7 +13,7 @@ homework_1.py: the driver code for programming assignment 1, which read in input
 
 homework_2.py: the driver code for programming assignment 2, which read in input data from source files stored under "PA2 Student Data", performs model fitting and distortion correction, then output the result to a txt file in the OUTPUT folder
 
-validation_test.py: the script that contains a series of unittest that examines the basic functionality of implementation in 
+debug_test.py: the script that contains a series of unittest that examines the basic functionality of implementation in 
 
 calibration_library.py and dataParsing_library.py 
 

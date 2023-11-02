@@ -11,7 +11,7 @@ class TestDistortionCorrection(unittest.TestCase):
         np.random.seed(0) 
         self.distorted_data = np.random.rand(10000, 3) * 10
         self.ground_truth_data = self.distorted_data + np.random.randn(10000, 3) * 0.1
-        self.sample_data = np.array([[6, 6, 6], [1,1,1], [3,3,3]])
+        self.sample_data = np.array([[6, 6, 6], [1,1,1], [3,0,3]])
         self.source_points = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         self.target_points = np.array([[2, 3, 4], [5, 6, 7], [8, 9, 10]])
         self.set_registration = setRegistration()
@@ -91,27 +91,6 @@ class TestDistortionCorrection(unittest.TestCase):
         frame_chunk = 4
         frames = parseFrame(test_data, frame_chunk)
         self.assertEqual(len(frames), len(test_data) // frame_chunk)
-    '''
-    def calculate_error_from_sample(self, file1, file2, use_reference=0):
-        with open(file1, 'r') as f1:
-            next(f1)
-            data1 = [list(map(float, line.strip().split(','))) for line in f1]
 
-        with open(file2, 'r') as f2:
-            next(f2)
-            data2 = [list(map(float, line.strip().split(','))) for line in f2]
-
-        reference_data = data1 if use_reference == 0 else data2
-
-        percentage_differences = []
-        for row1, row2 in zip(data1, data2):
-            percentage_diff_row = []
-            for val1, val2 in zip(row1, row2):
-                percentage_diff = ((val2 - val1) / val1)
-                percentage_diff_row.append(percentage_diff)
-            percentage_differences.append(percentage_diff_row)
-
-        return percentage_differences
-    '''
 if __name__ == '__main__':
     unittest.main()

@@ -1,7 +1,7 @@
 import numpy as np, copy, os, re, argparse, click
 from calibration_library import *
 from dataParsing_library import *
-from validation_test import *
+from debug_test import *
 
 def main(): 
     # User interface prompt that takes input from user
