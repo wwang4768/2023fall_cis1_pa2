@@ -6,7 +6,7 @@ from distortion_library import *
 
 def main(): 
     # User interface prompt that takes input from user
-    parser = argparse.ArgumentParser(description='Description of your script')
+    parser = argparse.ArgumentParser(description='homework_2 input')
     parser.add_argument('input_type', help='The debug or unknown input data to process')
     parser.add_argument('choose_set', help='The alphabetical index of the data set')
     args = parser.parse_args()

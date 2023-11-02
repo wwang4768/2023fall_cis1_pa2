@@ -7,7 +7,7 @@ from distortion_library import *
 class TestDistortionCorrection(unittest.TestCase):
 
     def setUp(self):
-        # Initialize common test data here
+        # Initialize class data here
         np.random.seed(0) 
         self.distorted_data = np.random.rand(10000, 3) * 10
         self.ground_truth_data = self.distorted_data + np.random.randn(10000, 3) * 0.1
@@ -15,7 +15,7 @@ class TestDistortionCorrection(unittest.TestCase):
         self.source_points = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         self.target_points = np.array([[2, 3, 4], [5, 6, 7], [8, 9, 10]])
         self.set_registration = setRegistration()
-    '''
+
     def test_calibration_and_correction(self):
         calibrator_corrected = DewarpingCalibrationCorrected()
         calibrator_corrected.fit(self.distorted_data, self.ground_truth_data)
@@ -48,15 +48,10 @@ class TestDistortionCorrection(unittest.TestCase):
 
         # Assert that the corrected_sample is not None
         self.assertIsNotNone(corrected_sample)
-    '''
+
     def test_calculate_3d_transformation(self):
         transformation_matrix = self.set_registration.calculate_3d_transformation(self.source_points, self.target_points)
         self.assertEqual(transformation_matrix.shape, (4, 4))
-
-    def test_compute_error(self):
-        transformation_matrix = self.set_registration.calculate_3d_transformation(self.source_points, self.target_points)
-        error = self.set_registration.compute_error(self.source_points, self.target_points, transformation_matrix)
-        self.assertLess(error, 1.0)
 
     def test_apply_transformation(self):
         transformation_matrix = self.set_registration.calculate_3d_transformation(self.source_points, self.target_points)

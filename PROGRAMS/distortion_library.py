@@ -43,7 +43,7 @@ class DewarpingCalibrationCorrected:
     
     INPUT:
     degree: The degree of the Bernstein polynomial.
-    u: A NumPy array containing input values for the polynomial.
+    u: input values for the polynomial (NumPy Array)
     
     OUTPUT:
     Computed F matrix
@@ -85,7 +85,7 @@ class DewarpingCalibrationCorrected:
 
     '''
     The function applies the distortion correction to input data
-    
+
     INPUT:
     data: data to be corrected (Numpy Array)
     q_min: minimum values used for scaling (Numpy Array)
