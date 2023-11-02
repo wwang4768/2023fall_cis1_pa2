@@ -26,4 +26,4 @@ For example, "python .\homework_2.py unknown i"
 
 To run the driver code, please enter below in the terminal:
 python debug_test.py
-python error_analysis.py
+python error_analysis.py {input_type} {choose_set}
