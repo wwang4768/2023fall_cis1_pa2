@@ -24,6 +24,14 @@ def main():
     calreading_point_cloud = parseData(calreading)
     calreading_frames = parseFrame(calreading_point_cloud, 8+8+27) # 8 optical markers on calibration object and 27 EM markers on calibration object
     
+    empivot = base_path + '-empivot.txt'
+    empivot_point_cloud = parseData(empivot)
+    empivot_frames = parseFrame(empivot_point_cloud, 6) # stores the list of 12 frames, each of which contains data of 6 EM markers on probe 
+    
+    optpivot = base_path + '-optpivot.txt'
+    optpivot_point_cloud = parseData(optpivot) # stores the list of 12 frames, each of which contains data of 8 optical markers on EM base & 6 EM markers on probe
+    optpivot_em_frames, optpivot_opt_frames = parseOptpivot(optpivot_point_cloud, 8, 6) 
+
     # new inputs specific to PA2 to be incorporated 
     ct_fid = base_path + '-ct-fiducials.txt'
     ct_fid_point_cloud = parseData(ct_fid)
@@ -37,22 +45,11 @@ def main():
     em_nav_point_cloud = parseData(em_nav)
     em_nav_frames = parseFrame(em_nav_point_cloud, 6) # stores the list of 4 frames, each of which contains data of 6 EM markers on probe 
 
-    empivot = base_path + '-empivot.txt'
-    empivot_point_cloud = parseData(empivot)
-    empivot_frames = parseFrame(empivot_point_cloud, 6) # stores the list of 12 frames, each of which contains data of 6 EM markers on probe 
-    
-    optpivot = base_path + '-optpivot.txt'
-    optpivot_point_cloud = parseData(optpivot) # stores the list of 12 frames, each of which contains data of 8 optical markers on EM base & 6 EM markers on probe
-    optpivot_em_frames, optpivot_opt_frames = parseOptpivot(optpivot_point_cloud, 8, 6) 
-    
-
     registration = setRegistration()
     np.set_printoptions(formatter={'float': '{:.2f}'.format})
 
     # Step 1
-    # Use transformed Ci expected from ci, compared against real Ci
-    # in calreading to calculate degree of distortion
-
+    # Use transformed Ci expected from ci, compared against real Ci in calreading to calculate degree of distortion
     source_points_d = d0
     trans_matrix_d = []
     target_points = []
@@ -81,7 +78,7 @@ def main():
         transformation_matrix = np.dot(np.linalg.inv(trans_matrix_d[i]), trans_matrix_a[i])
         transformed_point.append(registration.apply_transformation(source_points_c, transformation_matrix))
     
-    # 27 * 125 frames Ci expected 
+    # transformed_point should contain 3375 = 27 * 125 frames Ci expected 
 
     # Step 2
     # undistort empivot_frames
@@ -103,8 +100,6 @@ def main():
 
     # 12 frames, each of which has 6 points
     # Everything related G has to be corrected to dewarp the distortion
-    # corrected_empivot_sample = calibrator_corrected.correction(sample_data)
-
     corrected_empivot_sample = []
     for i in range(12):
         corrected_empivot_sample.append(calibrator_corrected.correction(sample_data[i]))
